@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Italian Conversation Quest</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 700px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            color: #667eea;
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+        
+        .scenario {
+            background: #f0f4ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .scenario h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .scenario p {
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .question {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .options {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .option {
+            padding: 15px 20px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1em;
+        }
+        
+        .option:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        
+        .option.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .option.correct {
+            border-color: #10b981;
+            background: #d1fae5;
+            animation: pulse 0.5s;
+        }
+        
+        .option.incorrect {
+            border-color: #ef4444;
+            background: #fee2e2;
+            animation: shake 0.5s;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        .feedback {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .feedback.correct {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+            display: block;
+        }
+        
+        .feedback.incorrect {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+            display: block;
+        }
+        
+        .feedback strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+            width: 100%;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .start-screen, .end-screen {
+            text-align: center;
+        }
+        
+        .start-screen h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .start-screen ul {
+            text-align: left;
+            margin: 20px auto;
+            max-width: 400px;
+            color: #666;
+            line-height: 2;
+        }
+        
+        .end-screen h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+        
+        .score-display {
+            font-size: 3em;
+            color: #667eea;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        
+        .performance {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .hint {
+            background: #fff3cd;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #ffc107;
+            color: #856404;
+            font-size: 0.95em;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>🇮🇹 Italian Conversation Quest</h1>
+            <p>Master basic Italian vocabulary for real conversations!</p>
+        </div>
+        
+        <div id="startScreen" class="start-screen">
+            <h2>Welcome to Your Italian Adventure!</h2>
+            <p>Learn essential Italian phrases through 10 real-life scenarios.</p>
+            <ul>
+                <li>✨ 10 interactive conversation challenges</li>
+                <li>🎯 Instant feedback with explanations</li>
+                <li>🏆 Track your progress and score</li>
+                <li>💡 Helpful hints for each scenario</li>
+            </ul>
+            <button class="btn btn-primary" onclick="startGame()">Iniziamo! (Let's Begin!)</button>
+        </div>
+        
+        <div id="gameScreen" class="hidden">
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-label">Question</div>
+                    <div class="stat-value" id="questionNumber">1/10</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Score</div>
+                    <div class="stat-value" id="score">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Streak</div>
+                    <div class="stat-value" id="streak">0 🔥</div>
+                </div>
+            </div>
+            
+            <div class="scenario">
+                <h3 id="scenarioTitle"></h3>
+                <p id="scenarioContext"></p>
+                <div class="hint" id="hint"></div>
+            </div>
+            
+            <div class="question" id="question"></div>
+            
+            <div class="options" id="options"></div>
+            
+            <div class="feedback" id="feedback"></div>
+            
+            <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" style="display: none;">Next Question →</button>
+        </div>
+        
+        <div id="endScreen" class="end-screen hidden">
+            <h2>Complimenti! (Congratulations!)</h2>
+            <div class="score-display" id="finalScore"></div>
+            <div class="performance">
+                <h3>Your Performance:</h3>
+                <p id="performanceText"></p>
+                <p style="margin-top: 15px; color: #666;" id="encouragement"></p>
+            </div>
+            <button class="btn btn-primary" onclick="restartGame()">Play Again 🔄</button>
+        </div>
+    </div>
+    
+    <script>
+        const questions = [
+            {
+                scenario: "🏨 At the Hotel Reception",
+                context: "You've just arrived at your hotel in Rome and need to check in.",
+                hint: "💡 Think about what you'd need when arriving at a hotel",
+                question: "How do you say 'I have a reservation'?",
+                options: [
+                    "Ho una prenotazione",
+                    "Voglio una camera",
+                    "Dov'è il bagno?",
+                    "Quanto costa?"
+                ],
+                correct: 0,
+                explanation: "'Ho una prenotazione' means 'I have a reservation'. 'Ho' = I have, 'una' = a, 'prenotazione' = reservation."
+            },
+            {
+                scenario: "🍕 At a Restaurant",
+                context: "You're at a trattoria and the waiter approaches your table.",
+                hint: "💡 When seated at a restaurant, servers will ask if you're ready",
+                question: "The waiter asks: 'Siete pronti per ordinare?' What does this mean?",
+                options: [
+                    "Do you have a reservation?",
+                    "Are you ready to order?",
+                    "Would you like the bill?",
+                    "What would you like to drink?"
+                ],
+                correct: 1,
+                explanation: "'Siete pronti per ordinare?' means 'Are you ready to order?' 'Pronti' = ready, 'ordinare' = to order."
+            },
+            {
+                scenario: "🚇 Using Public Transport",
+                context: "You need to buy a metro ticket at the station.",
+                hint: "💡 Focus on the word for 'ticket' in Italian",
+                question: "How do you ask for 'one ticket, please'?",
+                options: [
+                    "Un caffè, per favore",
+                    "Un biglietto, per favore",
+                    "Una camera, per favore",
+                    "Un tavolo, per favore"
+                ],
+                correct: 1,
+                explanation: "'Un biglietto, per favore' means 'One ticket, please'. 'Biglietto' is ticket, 'per favore' is please."
+            },
+            {
+                scenario: "🛍️ Shopping at the Market",
+                context: "You want to know the price of some fresh tomatoes.",
+                hint: "💡 'Quanto' relates to 'quantity' or 'how much'",
+                question: "How do you ask 'How much does this cost?'",
+                options: [
+                    "Dove si trova?",
+                    "Quanto costa?",
+                    "Che ore sono?",
+                    "Come stai?"
+                ],
+                correct: 1,
+                explanation: "'Quanto costa?' means 'How much does it cost?' This is essential for shopping anywhere in Italy!"
+            },
+            {
+                scenario: "🗺️ Asking for Directions",
+                context: "You're lost and need to find the Colosseum.",
+                hint: "💡 'Dov'è' is a contraction of 'dove è' (where is)",
+                question: "How do you ask 'Where is the Colosseum?'",
+                options: [
+                    "Dov'è il Colosseo?",
+                    "Quanto costa il Colosseo?",
+                    "Come si chiama?",
+                    "Che ore sono?"
+                ],
+                correct: 0,
+                explanation: "'Dov'è il Colosseo?' means 'Where is the Colosseum?' 'Dov'è' = where is, 'il' = the."
+            },
+            {
+                scenario: "☕ At a Café",
+                context: "It's morning and you want to order a traditional Italian breakfast.",
+                hint: "💡 Italians love their coffee - especially espresso!",
+                question: "What's the most common way to order an espresso?",
+                options: [
+                    "Un tè, per favore",
+                    "Un'acqua, per favore",
+                    "Un caffè, per favore",
+                    "Un vino, per favore"
+                ],
+                correct: 2,
+                explanation: "'Un caffè, per favore' (A coffee, please). In Italy, 'caffè' typically means espresso by default!"
+            },
+            {
+                scenario: "👋 Meeting New People",
+                context: "You meet an Italian friend in the afternoon.",
+                hint: "💡 Time of day matters in Italian greetings",
+                question: "What's the appropriate greeting for the afternoon?",
+                options: [
+                    "Buongiorno",
+                    "Buonasera",
+                    "Buonanotte",
+                    "Ciao ciao"
+                ],
+                correct: 1,
+                explanation: "'Buonasera' (Good evening) is used from afternoon onwards. 'Buongiorno' is morning/early afternoon, 'Buonanotte' is goodnight."
+            },
+            {
+                scenario: "🍽️ During the Meal",
+                context: "Your food arrives and it looks delicious!",
+                hint: "💡 This phrase literally means 'good appetite'",
+                question: "What do Italians say before eating? (like 'Bon appétit')",
+                options: [
+                    "Salute!",
+                    "Buon appetito!",
+                    "Grazie mille!",
+                    "Prego!"
+                ],
+                correct: 1,
+                explanation: "'Buon appetito!' means 'Enjoy your meal!' It's customary to say this before eating. You can respond with 'Grazie, altrettanto!' (Thanks, same to you!)"
+            },
+            {
+                scenario: "💳 Paying the Bill",
+                context: "You've finished your meal and want to pay.",
+                hint: "💡 'Conto' is the word for 'bill' or 'check'",
+                question: "How do you ask for the bill?",
+                options: [
+                    "Il menu, per favore",
+                    "Il conto, per favore",
+                    "La carta, per favore",
+                    "Il tavolo, per favore"
+                ],
+                correct: 1,
+                explanation: "'Il conto, per favore' means 'The bill, please'. Remember, in Italy you usually have to ask for the bill - it's not brought automatically!"
+            },
+            {
+                scenario: "🙏 Being Polite",
+                context: "Someone helps you with your luggage.",
+                hint: "💡 'Mille' means 'thousand' - it intensifies the thanks!",
+                question: "How do you say 'Thank you very much'?",
+                options: [
+                    "Prego",
+                    "Scusi",
+                    "Grazie mille",
+                    "Per favore"
+                ],
+                correct: 2,
+                explanation: "'Grazie mille' literally means 'a thousand thanks' and is a warmer way to say thank you very much. 'Prego' means 'you're welcome'."
+            }
+        ];
+        
+        let currentQuestion = 0;
+        let score = 0;
+        let streak = 0;
+        let answered = false;
+        
+        function startGame() {
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            loadQuestion();
+        }
+        
+        function loadQuestion() {
+            answered = false;
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('feedback').className = 'feedback';
+            
+            const q = questions[currentQuestion];
+            
+            document.getElementById('questionNumber').textContent = `${currentQuestion + 1}/10`;
+            document.getElementById('scenarioTitle').textContent = q.scenario;
+            document.getElementById('scenarioContext').textContent = q.context;
+            document.getElementById('hint').textContent = q.hint;
+            document.getElementById('question').textContent = q.question;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            q.options.forEach((option, index) => {
+                const btn = document.createElement('div');
+                btn.className = 'option';
+                btn.textContent = option;
+                btn.onclick = () => selectAnswer(index);
+                optionsContainer.appendChild(btn);
+            });
+        }
+        
+        function selectAnswer(selected) {
+            if (answered) return;
+            
+            answered = true;
+            const q = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            const feedback = document.getElementById('feedback');
+            
+            options[selected].classList.add('selected');
+            
+            if (selected === q.correct) {
+                options[selected].classList.add('correct');
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = `<strong>✅ Perfetto! (Perfect!)</strong>${q.explanation}`;
+                score += 10;
+                streak++;
+                
+                if (streak >= 3) {
+                    score += 5; // Bonus for streak
+                    feedback.innerHTML += `<br><br>🔥 ${streak} in a row! +5 bonus points!`;
+                }
+            } else {
+                options[selected].classList.add('incorrect');
+                options[q.correct].classList.add('correct');
+                feedback.className = 'feedback incorrect';
+                feedback.innerHTML = `<strong>❌ Non è corretto (Not correct)</strong>The correct answer is: <strong>${q.options[q.correct]}</strong><br><br>${q.explanation}`;
+                streak = 0;
+            }
+            
+            document.getElementById('score').textContent = score;
+            document.getElementById('streak').textContent = `${streak} 🔥`;
+            document.getElementById('nextBtn').style.display = 'block';
+        }
+        
+        function nextQuestion() {
+            currentQuestion++;
+            
+            if (currentQuestion < questions.length) {
+                loadQuestion();
+            } else {
+                endGame();
+            }
+        }
+        
+        function endGame() {
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('endScreen').classList.remove('hidden');
+            
+            const percentage = (score / 100) * 100;
+            document.getElementById('finalScore').textContent = `${score}/100`;
+            
+            let performance, encouragement;
+            
+            if (percentage >= 90) {
+                performance = "🌟 Outstanding! You're ready for conversations in Italy!";
+                encouragement = "Sei bravissimo! (You're very good!) Your Italian is impressive!";
+            } else if (percentage >= 70) {
+                performance = "🎉 Great job! You have a solid foundation!";
+                encouragement = "Bravo! Keep practicing and you'll be fluent in no time!";
+            } else if (percentage >= 50) {
+                performance = "👍 Good effort! You're learning the basics!";
+                encouragement = "Continua così! (Keep it up!) Practice makes perfect!";
+            } else {
+                performance = "📚 Keep practicing! Review the phrases and try again!";
+                encouragement = "Non mollare! (Don't give up!) Every expert was once a beginner!";
+            }
+            
+            document.getElementById('performanceText').textContent = performance;
+            document.getElementById('encouragement').textContent = encouragement;
+        }
+        
+        function restartGame() {
+            currentQuestion = 0;
+            score = 0;
+            streak = 0;
+            
+            document.getElementById('endScreen').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
